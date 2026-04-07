@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
 import { ClientesModule } from './modules/clientes/clientes.module';
@@ -12,6 +14,11 @@ import { ReportesModule } from './modules/reportes/reportes.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: [join(__dirname, '..', '.env'), '.env'],
+    }),
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      autoSchemaFile: join(process.cwd(), 'schema.gql'),
+      sortSchema: true,
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],

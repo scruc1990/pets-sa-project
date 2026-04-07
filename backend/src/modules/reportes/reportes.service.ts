@@ -3,12 +3,18 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AuditoriaMedicamentosClientesQueryDto } from './dto/auditoria-medicamentos-clientes.query.dto';
 import { Mascota } from '../mascotas/entities/mascota.entity';
+import { Cliente } from '../clientes/entities/cliente.entity';
+import { Medicamento } from '../medicamentos/entities/medicamento.entity';
 
 @Injectable()
 export class ReportesService {
   constructor(
     @InjectRepository(Mascota)
     private readonly mascotasRepository: Repository<Mascota>,
+    @InjectRepository(Cliente)
+    private readonly clientesRepository: Repository<Cliente>,
+    @InjectRepository(Medicamento)
+    private readonly medicamentosRepository: Repository<Medicamento>,
   ) {}
 
   async getAuditoriaMedicamentosClientes(
@@ -106,6 +112,40 @@ export class ReportesService {
       resumenPorCliente,
       resumenPorMedicamento,
       detalles,
+    };
+  }
+
+  async getResumenDashboard() {
+    const [totalClientes, totalMedicamentos, totalMascotas, rawMascotasPorMedicamento] =
+      await Promise.all([
+        this.clientesRepository.count(),
+        this.medicamentosRepository.count(),
+        this.mascotasRepository.count(),
+        this.mascotasRepository
+          .createQueryBuilder('mascota')
+          .leftJoin('mascota.medicamento', 'medicamento')
+          .select('mascota.medicamentoId', 'medicamentoId')
+          .addSelect('medicamento.nombre', 'medicamentoNombre')
+          .addSelect('COUNT(mascota.id)', 'totalMascotas')
+          .groupBy('mascota.medicamentoId')
+          .addGroupBy('medicamento.nombre')
+          .orderBy('medicamento.nombre', 'ASC')
+          .getRawMany<{
+            medicamentoId: string;
+            medicamentoNombre: string;
+            totalMascotas: string;
+          }>(),
+      ]);
+
+    return {
+      totalClientes,
+      totalMedicamentos,
+      totalMascotas,
+      mascotasPorMedicamento: rawMascotasPorMedicamento.map((item) => ({
+        medicamentoId: Number(item.medicamentoId),
+        medicamentoNombre: item.medicamentoNombre,
+        totalMascotas: Number(item.totalMascotas),
+      })),
     };
   }
 }

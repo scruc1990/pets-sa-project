@@ -38,11 +38,16 @@ export class MascotasService extends BaseService {
     }
 
     const mascota = this.mascotasRepository.create(createMascotaDto);
-    return this.mascotasRepository.save(mascota);
+    const savedMascota = await this.mascotasRepository.save(mascota);
+    return this.findOne(savedMascota.id);
   }
 
   findAll() {
     return this.mascotasRepository.find({
+      relations: {
+        cliente: true,
+        medicamento: true,
+      },
       order: { nombre: 'ASC' },
     });
   }
@@ -50,7 +55,13 @@ export class MascotasService extends BaseService {
   async findOne(id: string) {
     this.ensureId(id);
 
-    const mascota = await this.mascotasRepository.findOneBy({ id });
+    const mascota = await this.mascotasRepository.findOne({
+      where: { id },
+      relations: {
+        cliente: true,
+        medicamento: true,
+      },
+    });
     if (!mascota) {
       this.throwNotFound(id);
     }
@@ -81,8 +92,12 @@ export class MascotasService extends BaseService {
       }
     }
 
-    const updatedMascota = this.mascotasRepository.merge(mascota, updateMascotaDto);
-    return this.mascotasRepository.save(updatedMascota);
+    const updatedMascota = this.mascotasRepository.merge(
+      mascota,
+      updateMascotaDto,
+    );
+    await this.mascotasRepository.save(updatedMascota);
+    return this.findOne(id);
   }
 
   async remove(id: string) {

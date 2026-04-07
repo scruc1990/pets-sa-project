@@ -1,6 +1,7 @@
-import { OmitType, PartialType } from '@nestjs/mapped-types';
+import { InputType, OmitType, PartialType } from '@nestjs/graphql';
 import { CreateClienteDto } from './create-cliente.dto';
 
+@InputType()
 export class UpdateClienteDto extends PartialType(
-	OmitType(CreateClienteDto, ['cedula'] as const),
+  OmitType(CreateClienteDto, ['cedula'] as const),
 ) {}
