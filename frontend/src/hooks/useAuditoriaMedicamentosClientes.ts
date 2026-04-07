@@ -1,12 +1,18 @@
-import { useMemo } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { getAuditoriaMedicamentosClientes } from '../api/reportes'
+import { useMemo } from 'react';
+import { useQuery } from '@apollo/client/react';
+import {
+  GET_AUDITORIA_MEDICAMENTOS_CLIENTES,
+  type AuditoriaMedicamentosClientesGraphQL,
+} from '../graphql/reportes';
 
 export function useAuditoriaMedicamentosClientes() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ['auditoria-medicamentos-clientes'],
-    queryFn: getAuditoriaMedicamentosClientes,
-  })
+  const { data, loading, error, refetch, networkStatus } = useQuery<{
+    auditoriaMedicamentosClientes: AuditoriaMedicamentosClientesGraphQL;
+  }>(GET_AUDITORIA_MEDICAMENTOS_CLIENTES, {
+    notifyOnNetworkStatusChange: true,
+  });
+
+  const detailData = data?.auditoriaMedicamentosClientes;
 
   const detalleColumns = useMemo(
     () => [
@@ -17,41 +23,45 @@ export function useAuditoriaMedicamentosClientes() {
       { key: 'medicamentoDosis', header: 'Dosis' },
     ],
     [],
-  )
+  );
 
   const resumenClienteRows = useMemo(() => {
-    if (!data) {
-      return []
+    if (!detailData) {
+      return [];
     }
 
-    return Object.entries(data.resumenPorCliente).map(([cedula, value]) => ({
-      cedula,
-      nombre: value.clienteNombreCompleto,
-      totalMascotas: value.totalMascotas,
-    }))
-  }, [data])
+    return detailData.resumenPorCliente.map(
+      (item: AuditoriaMedicamentosClientesGraphQL['resumenPorCliente'][number]) => ({
+        cedula: item.clienteCedula,
+        nombre: item.clienteNombreCompleto,
+        totalMascotas: item.totalMascotas,
+      }),
+    );
+  }, [detailData]);
 
   const resumenMedicamentoRows = useMemo(() => {
-    if (!data) {
-      return []
+    if (!detailData) {
+      return [];
     }
 
-    return Object.entries(data.resumenPorMedicamento).map(([id, value]) => ({
-      medicamentoId: id,
-      medicamentoNombre: value.medicamentoNombre,
-      totalMascotas: value.totalMascotas,
-    }))
-  }, [data])
+    return detailData.resumenPorMedicamento.map(
+      (item: AuditoriaMedicamentosClientesGraphQL['resumenPorMedicamento'][number]) => ({
+        medicamentoId: String(item.medicamentoId),
+        medicamentoNombre: item.medicamentoNombre,
+        totalMascotas: item.totalMascotas,
+      }),
+    );
+  }, [detailData]);
 
   return {
-    data,
-    isLoading,
-    isError,
+    data: detailData,
+    isLoading: loading,
+    isError: Boolean(error),
     error,
     refetch,
-    isFetching,
+    isFetching: networkStatus === 4,
     detalleColumns,
     resumenClienteRows,
     resumenMedicamentoRows,
-  }
+  };
 }
