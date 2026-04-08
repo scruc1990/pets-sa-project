@@ -2,7 +2,7 @@ import { Field, GraphQLISODateTime, Int, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
 export class AuditoriaFiltroAplicadoType {
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   clienteId?: string | null;
 
   @Field(() => Int, { nullable: true })
@@ -12,104 +12,104 @@ export class AuditoriaFiltroAplicadoType {
 @ObjectType()
 export class AuditoriaDetalleType {
   @Field()
-  mascotaId: string;
+  mascotaId!: string;
 
   @Field()
-  mascotaNombre: string;
+  mascotaNombre!: string;
 
   @Field()
-  raza: string;
+  raza!: string;
 
   @Field()
-  clienteCedula: string;
+  clienteCedula!: string;
 
   @Field()
-  clienteNombreCompleto: string;
+  clienteNombreCompleto!: string;
 
   @Field(() => Int)
-  medicamentoId: number;
+  medicamentoId!: number;
 
   @Field()
-  medicamentoNombre: string;
+  medicamentoNombre!: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   medicamentoDosis?: string | null;
 
   @Field()
-  estadoAuditoria: string;
+  estadoAuditoria!: string;
 }
 
 @ObjectType()
 export class ResumenClienteType {
   @Field()
-  clienteCedula: string;
+  clienteCedula!: string;
 
   @Field()
-  clienteNombreCompleto: string;
+  clienteNombreCompleto!: string;
 
   @Field(() => Int)
-  totalMascotas: number;
+  totalMascotas!: number;
 }
 
 @ObjectType()
 export class ResumenMedicamentoType {
   @Field(() => Int)
-  medicamentoId: number;
+  medicamentoId!: number;
 
   @Field()
-  medicamentoNombre: string;
+  medicamentoNombre!: string;
 
   @Field(() => Int)
-  totalMascotas: number;
+  totalMascotas!: number;
 }
 
 @ObjectType()
 export class AuditoriaMedicamentosClientesReportType {
   @Field(() => GraphQLISODateTime)
-  generadoEn: Date;
+  generadoEn!: Date;
 
   @Field(() => AuditoriaFiltroAplicadoType)
-  filtrosAplicados: AuditoriaFiltroAplicadoType;
+  filtrosAplicados!: AuditoriaFiltroAplicadoType;
 
   @Field(() => Int)
-  totalRegistros: number;
+  totalRegistros!: number;
 
   @Field(() => Int)
-  totalInconsistencias: number;
+  totalInconsistencias!: number;
 
   @Field(() => [ResumenClienteType])
-  resumenPorCliente: ResumenClienteType[];
+  resumenPorCliente!: ResumenClienteType[];
 
   @Field(() => [ResumenMedicamentoType])
-  resumenPorMedicamento: ResumenMedicamentoType[];
+  resumenPorMedicamento!: ResumenMedicamentoType[];
 
   @Field(() => [AuditoriaDetalleType])
-  detalles: AuditoriaDetalleType[];
+  detalles!: AuditoriaDetalleType[];
 }
 
 @ObjectType()
 export class MedicamentoConteoType {
   @Field(() => Int)
-  medicamentoId: number;
+  medicamentoId!: number;
 
   @Field()
-  medicamentoNombre: string;
+  medicamentoNombre!: string;
 
   @Field(() => Int)
-  totalMascotas: number;
+  totalMascotas!: number;
 }
 
 @ObjectType()
 export class ResumenDashboardType {
   @Field(() => Int)
-  totalClientes: number;
+  totalClientes!: number;
 
   @Field(() => Int)
-  totalMedicamentos: number;
+  totalMedicamentos!: number;
 
   @Field(() => Int)
-  totalMascotas: number;
+  totalMascotas!: number;
 
   @Field(() => [MedicamentoConteoType])
-  mascotasPorMedicamento: MedicamentoConteoType[];
+  mascotasPorMedicamento!: MedicamentoConteoType[];
 }

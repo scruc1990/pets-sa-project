@@ -1,0 +1,154 @@
+type AuditoriaDetalleType {
+  clienteCedula: String!
+  clienteNombreCompleto: String!
+  estadoAuditoria: String!
+  mascotaId: String!
+  mascotaNombre: String!
+  medicamentoDosis: String
+  medicamentoId: Int!
+  medicamentoNombre: String!
+  raza: String!
+}
+
+type AuditoriaFiltroAplicadoType {
+  clienteId: String
+  medicamentoId: Int
+}
+
+type AuditoriaMedicamentosClientesReportType {
+  detalles: [AuditoriaDetalleType!]!
+  filtrosAplicados: AuditoriaFiltroAplicadoType!
+  generadoEn: DateTime!
+  resumenPorCliente: [ResumenClienteType!]!
+  resumenPorMedicamento: [ResumenMedicamentoType!]!
+  totalInconsistencias: Int!
+  totalRegistros: Int!
+}
+
+type Cliente {
+  apellidos: String!
+  cedula: String!
+  createdAt: DateTime!
+  direccion: String!
+  nombres: String!
+  telefono: String!
+  updatedAt: DateTime!
+}
+
+input CreateClienteDto {
+  apellidos: String!
+  cedula: String!
+  direccion: String!
+  nombres: String!
+  telefono: String!
+}
+
+input CreateMascotaDto {
+  clienteId: String!
+  edad: Int!
+  medicamentoId: Int!
+  nombre: String!
+  peso: Float!
+  raza: String!
+}
+
+input CreateMedicamentoDto {
+  descripcion: String!
+  dosis: String!
+  nombre: String!
+}
+
+scalar DateTime
+
+type Mascota {
+  cliente: Cliente
+  clienteId: String!
+  createdAt: DateTime!
+  edad: Int!
+  id: String!
+  medicamento: Medicamento
+  medicamentoId: Int!
+  nombre: String!
+  peso: Float!
+  raza: String!
+  updatedAt: DateTime!
+}
+
+type Medicamento {
+  createdAt: DateTime!
+  descripcion: String!
+  dosis: String!
+  id: Int!
+  nombre: String!
+  updatedAt: DateTime!
+}
+
+type MedicamentoConteoType {
+  medicamentoId: Int!
+  medicamentoNombre: String!
+  totalMascotas: Int!
+}
+
+type Mutation {
+  createCliente(input: CreateClienteDto!): Cliente!
+  createMascota(input: CreateMascotaDto!): Mascota!
+  createMedicamento(input: CreateMedicamentoDto!): Medicamento!
+  deleteCliente(cedula: String!): Cliente!
+  deleteMascota(id: String!): Mascota!
+  deleteMedicamento(id: Int!): Medicamento!
+  updateCliente(cedula: String!, input: UpdateClienteDto!): Cliente!
+  updateMascota(id: String!, input: UpdateMascotaDto!): Mascota!
+  updateMedicamento(id: Int!, input: UpdateMedicamentoDto!): Medicamento!
+}
+
+type Query {
+  auditoriaMedicamentosClientes(clienteId: String, medicamentoId: Int): AuditoriaMedicamentosClientesReportType!
+  cliente(cedula: String!): Cliente!
+  clientes: [Cliente!]!
+  mascota(id: String!): Mascota!
+  mascotas: [Mascota!]!
+  medicamento(id: Int!): Medicamento!
+  medicamentos: [Medicamento!]!
+  resumenDashboard: ResumenDashboardType!
+}
+
+type ResumenClienteType {
+  clienteCedula: String!
+  clienteNombreCompleto: String!
+  totalMascotas: Int!
+}
+
+type ResumenDashboardType {
+  mascotasPorMedicamento: [MedicamentoConteoType!]!
+  totalClientes: Int!
+  totalMascotas: Int!
+  totalMedicamentos: Int!
+}
+
+type ResumenMedicamentoType {
+  medicamentoId: Int!
+  medicamentoNombre: String!
+  totalMascotas: Int!
+}
+
+input UpdateClienteDto {
+  apellidos: String
+  direccion: String
+  nombres: String
+  telefono: String
+}
+
+input UpdateMascotaDto {
+  clienteId: String
+  edad: Int
+  medicamentoId: Int
+  nombre: String
+  peso: Float
+  raza: String
+}
+
+input UpdateMedicamentoDto {
+  descripcion: String
+  dosis: String
+  nombre: String
+}

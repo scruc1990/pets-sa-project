@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "PETS S.A. Backend API",
-    "description": "Coleccion Postman para CRUD de Clientes, Mascotas, Medicamentos y Reportes de auditoria.",
+    "name": "PETS S.A. GraphQL API",
+    "description": "Coleccion Postman para consultas y mutaciones GraphQL de Clientes, Mascotas, Medicamentos y Reportes de auditoria.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_postman_id": "3e4fa26b-2f10-4f5d-9e9d-5f7e3e3f9a01"
   },
@@ -38,16 +38,19 @@
               }
             ],
             "body": {
-              "mode": "raw",
-              "raw": "{\n  \"cedula\": \"123456789\",\n  \"nombres\": \"Juan\",\n  \"apellidos\": \"Perez\",\n  \"direccion\": \"Calle 10 #20-30\",\n  \"telefono\": \"3001234567\"\n}"
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation CreateCliente($input: CreateClienteDto!) { createCliente(input: $input) { cedula nombres apellidos direccion telefono createdAt updatedAt } }",
+                "variables": "{\n  \"input\": {\n    \"cedula\": \"123456789\",\n    \"nombres\": \"Juan\",\n    \"apellidos\": \"Perez\",\n    \"direccion\": \"Calle 10 #20-30\",\n    \"telefono\": \"3001234567\"\n  }\n}"
+              }
             },
             "url": {
-              "raw": "{{baseUrl}}/clientes",
+              "raw": "{{baseUrl}}/graphql",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "clientes"
+                "graphql"
               ]
             }
           }
@@ -55,38 +58,7 @@
         {
           "name": "Listar Clientes",
           "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/clientes",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "clientes"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Obtener Cliente por ID",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/clientes/{{clienteId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "clientes",
-                "{{clienteId}}"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Actualizar Cliente",
-          "request": {
-            "method": "PATCH",
+            "method": "POST",
             "header": [
               {
                 "key": "Content-Type",
@@ -94,17 +66,74 @@
               }
             ],
             "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nombres\": \"Juan Carlos\",\n  \"apellidos\": \"Perez Gomez\",\n  \"direccion\": \"Av. Siempre Viva 742\",\n  \"telefono\": \"3017654321\"\n}"
+              "mode": "graphql",
+              "graphql": {
+                "query": "query ListarClientes { clientes { cedula nombres apellidos direccion telefono createdAt updatedAt } }"
+              }
             },
             "url": {
-              "raw": "{{baseUrl}}/clientes/{{clienteId}}",
+              "raw": "{{baseUrl}}/graphql",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "clientes",
-                "{{clienteId}}"
+                "graphql"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obtener Cliente por ID",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query ObtenerCliente($cedula: String!) { cliente(cedula: $cedula) { cedula nombres apellidos direccion telefono createdAt updatedAt } }",
+                "variables": "{\n  \"cedula\": \"{{clienteId}}\"\n}"
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "graphql"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Actualizar Cliente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation ActualizarCliente($cedula: String!, $input: UpdateClienteDto!) { updateCliente(cedula: $cedula, input: $input) { cedula nombres apellidos direccion telefono createdAt updatedAt } }",
+                "variables": "{\n  \"cedula\": \"{{clienteId}}\",\n  \"input\": {\n    \"nombres\": \"Juan Carlos\",\n    \"apellidos\": \"Perez Gomez\",\n    \"direccion\": \"Av. Siempre Viva 742\",\n    \"telefono\": \"3017654321\"\n  }\n}"
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "graphql"
               ]
             }
           }
@@ -112,15 +141,27 @@
         {
           "name": "Eliminar Cliente",
           "request": {
-            "method": "DELETE",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation EliminarCliente($cedula: String!) { deleteCliente(cedula: $cedula) { cedula nombres apellidos direccion telefono createdAt updatedAt } }",
+                "variables": "{\n  \"cedula\": \"{{clienteId}}\"\n}"
+              }
+            },
             "url": {
-              "raw": "{{baseUrl}}/clientes/{{clienteId}}",
+              "raw": "{{baseUrl}}/graphql",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "clientes",
-                "{{clienteId}}"
+                "graphql"
               ]
             }
           }
@@ -141,16 +182,19 @@
               }
             ],
             "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Amoxicilina\",\n  \"descripcion\": \"Antibiotico de amplio espectro\",\n  \"dosis\": \"250 mg cada 12 horas\"\n}"
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation CrearMedicamento($input: CreateMedicamentoDto!) { createMedicamento(input: $input) { id nombre descripcion dosis createdAt updatedAt } }",
+                "variables": "{\n  \"input\": {\n    \"nombre\": \"Amoxicilina\",\n    \"descripcion\": \"Antibiotico de amplio espectro\",\n    \"dosis\": \"250 mg cada 12 horas\"\n  }\n}"
+              }
             },
             "url": {
-              "raw": "{{baseUrl}}/medicamentos",
+              "raw": "{{baseUrl}}/graphql",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "medicamentos"
+                "graphql"
               ]
             }
           }
@@ -158,38 +202,7 @@
         {
           "name": "Listar Medicamentos",
           "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/medicamentos",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "medicamentos"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Obtener Medicamento por ID",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/medicamentos/{{medicamentoId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "medicamentos",
-                "{{medicamentoId}}"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Actualizar Medicamento",
-          "request": {
-            "method": "PATCH",
+            "method": "POST",
             "header": [
               {
                 "key": "Content-Type",
@@ -197,17 +210,74 @@
               }
             ],
             "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Amoxicilina Plus\",\n  \"descripcion\": \"Antibiotico para infecciones bacterianas\",\n  \"dosis\": \"500 mg cada 12 horas\"\n}"
+              "mode": "graphql",
+              "graphql": {
+                "query": "query ListarMedicamentos { medicamentos { id nombre descripcion dosis createdAt updatedAt } }"
+              }
             },
             "url": {
-              "raw": "{{baseUrl}}/medicamentos/{{medicamentoId}}",
+              "raw": "{{baseUrl}}/graphql",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "medicamentos",
-                "{{medicamentoId}}"
+                "graphql"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obtener Medicamento por ID",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query ObtenerMedicamento($id: Int!) { medicamento(id: $id) { id nombre descripcion dosis createdAt updatedAt } }",
+                "variables": "{\n  \"id\": {{medicamentoId}}\n}"
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "graphql"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Actualizar Medicamento",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation ActualizarMedicamento($id: Int!, $input: UpdateMedicamentoDto!) { updateMedicamento(id: $id, input: $input) { id nombre descripcion dosis createdAt updatedAt } }",
+                "variables": "{\n  \"id\": {{medicamentoId}},\n  \"input\": {\n    \"nombre\": \"Amoxicilina Plus\",\n    \"descripcion\": \"Antibiotico para infecciones bacterianas\",\n    \"dosis\": \"500 mg cada 12 horas\"\n  }\n}"
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "graphql"
               ]
             }
           }
@@ -215,15 +285,27 @@
         {
           "name": "Eliminar Medicamento",
           "request": {
-            "method": "DELETE",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation EliminarMedicamento($id: Int!) { deleteMedicamento(id: $id) { id nombre descripcion dosis createdAt updatedAt } }",
+                "variables": "{\n  \"id\": {{medicamentoId}}\n}"
+              }
+            },
             "url": {
-              "raw": "{{baseUrl}}/medicamentos/{{medicamentoId}}",
+              "raw": "{{baseUrl}}/graphql",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "medicamentos",
-                "{{medicamentoId}}"
+                "graphql"
               ]
             }
           }
@@ -244,16 +326,19 @@
               }
             ],
             "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Firulais\",\n  \"raza\": \"Labrador\",\n  \"edad\": 3,\n  \"peso\": 12.5,\n  \"medicamentoId\": {{medicamentoId}},\n  \"clienteId\": \"{{clienteId}}\"\n}"
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation CrearMascota($input: CreateMascotaDto!) { createMascota(input: $input) { id nombre raza edad peso medicamentoId clienteId createdAt updatedAt } }",
+                "variables": "{\n  \"input\": {\n    \"nombre\": \"Firulais\",\n    \"raza\": \"Labrador\",\n    \"edad\": 3,\n    \"peso\": 12.5,\n    \"medicamentoId\": {{medicamentoId}},\n    \"clienteId\": \"{{clienteId}}\"\n  }\n}"
+              }
             },
             "url": {
-              "raw": "{{baseUrl}}/mascotas",
+              "raw": "{{baseUrl}}/graphql",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "mascotas"
+                "graphql"
               ]
             }
           }
@@ -261,38 +346,7 @@
         {
           "name": "Listar Mascotas",
           "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/mascotas",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "mascotas"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Obtener Mascota por ID",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/mascotas/{{mascotaId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "mascotas",
-                "{{mascotaId}}"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Actualizar Mascota",
-          "request": {
-            "method": "PATCH",
+            "method": "POST",
             "header": [
               {
                 "key": "Content-Type",
@@ -300,17 +354,74 @@
               }
             ],
             "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Firulais II\",\n  \"raza\": \"Golden Retriever\",\n  \"edad\": 4,\n  \"peso\": 14.2,\n  \"medicamentoId\": {{medicamentoId}},\n  \"clienteId\": \"{{clienteId}}\"\n}"
+              "mode": "graphql",
+              "graphql": {
+                "query": "query ListarMascotas { mascotas { id nombre raza edad peso medicamentoId clienteId createdAt updatedAt cliente { cedula nombres apellidos direccion telefono } medicamento { id nombre descripcion dosis } } }"
+              }
             },
             "url": {
-              "raw": "{{baseUrl}}/mascotas/{{mascotaId}}",
+              "raw": "{{baseUrl}}/graphql",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "mascotas",
-                "{{mascotaId}}"
+                "graphql"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obtener Mascota por ID",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query ObtenerMascota($id: String!) { mascota(id: $id) { id nombre raza edad peso medicamentoId clienteId createdAt updatedAt cliente { cedula nombres apellidos direccion telefono } medicamento { id nombre descripcion dosis } } }",
+                "variables": "{\n  \"id\": \"{{mascotaId}}\"\n}"
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "graphql"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Actualizar Mascota",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation ActualizarMascota($id: String!, $input: UpdateMascotaDto!) { updateMascota(id: $id, input: $input) { id nombre raza edad peso medicamentoId clienteId createdAt updatedAt } }",
+                "variables": "{\n  \"id\": \"{{mascotaId}}\",\n  \"input\": {\n    \"nombre\": \"Firulais II\",\n    \"raza\": \"Golden Retriever\",\n    \"edad\": 4,\n    \"peso\": 14.2,\n    \"medicamentoId\": {{medicamentoId}},\n    \"clienteId\": \"{{clienteId}}\"\n  }\n}"
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "graphql"
               ]
             }
           }
@@ -318,15 +429,27 @@
         {
           "name": "Eliminar Mascota",
           "request": {
-            "method": "DELETE",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation EliminarMascota($id: String!) { deleteMascota(id: $id) { id nombre raza edad peso medicamentoId clienteId createdAt updatedAt } }",
+                "variables": "{\n  \"id\": \"{{mascotaId}}\"\n}"
+              }
+            },
             "url": {
-              "raw": "{{baseUrl}}/mascotas/{{mascotaId}}",
+              "raw": "{{baseUrl}}/graphql",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "mascotas",
-                "{{mascotaId}}"
+                "graphql"
               ]
             }
           }
@@ -339,16 +462,26 @@
         {
           "name": "Auditoria Medicamentos-Clientes (sin filtros)",
           "request": {
-            "method": "GET",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query AuditoriaMedicamentosClientes { auditoriaMedicamentosClientes { generadoEn filtrosAplicados { clienteId medicamentoId } totalRegistros totalInconsistencias resumenPorCliente { clienteCedula clienteNombreCompleto totalMascotas } resumenPorMedicamento { medicamentoId medicamentoNombre totalMascotas } detalles { mascotaId mascotaNombre raza clienteCedula clienteNombreCompleto medicamentoId medicamentoNombre medicamentoDosis estadoAuditoria } } }"
+              }
+            },
             "url": {
-              "raw": "{{baseUrl}}/reportes/auditoria/medicamentos-clientes",
+              "raw": "{{baseUrl}}/graphql",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "reportes",
-                "auditoria",
-                "medicamentos-clientes"
+                "graphql"
               ]
             }
           }
@@ -356,26 +489,54 @@
         {
           "name": "Auditoria Medicamentos-Clientes (con filtros)",
           "request": {
-            "method": "GET",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query AuditoriaMedicamentosClientesFiltrada($clienteId: String, $medicamentoId: Int) { auditoriaMedicamentosClientes(clienteId: $clienteId, medicamentoId: $medicamentoId) { generadoEn filtrosAplicados { clienteId medicamentoId } totalRegistros totalInconsistencias resumenPorCliente { clienteCedula clienteNombreCompleto totalMascotas } resumenPorMedicamento { medicamentoId medicamentoNombre totalMascotas } detalles { mascotaId mascotaNombre raza clienteCedula clienteNombreCompleto medicamentoId medicamentoNombre medicamentoDosis estadoAuditoria } } }",
+                "variables": "{\n  \"clienteId\": \"{{clienteId}}\",\n  \"medicamentoId\": {{medicamentoId}}\n}"
+              }
+            },
             "url": {
-              "raw": "{{baseUrl}}/reportes/auditoria/medicamentos-clientes?clienteId={{clienteId}}&medicamentoId={{medicamentoId}}",
+              "raw": "{{baseUrl}}/graphql",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "reportes",
-                "auditoria",
-                "medicamentos-clientes"
+                "graphql"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Resumen Dashboard",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query ResumenDashboard { resumenDashboard { totalClientes totalMedicamentos totalMascotas mascotasPorMedicamento { medicamentoId medicamentoNombre totalMascotas } } }"
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": [
+                "{{baseUrl}}"
               ],
-              "query": [
-                {
-                  "key": "clienteId",
-                  "value": "{{clienteId}}"
-                },
-                {
-                  "key": "medicamentoId",
-                  "value": "{{medicamentoId}}"
-                }
+              "path": [
+                "graphql"
               ]
             }
           }
