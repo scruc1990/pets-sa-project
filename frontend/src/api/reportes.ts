@@ -1,45 +1,69 @@
-import axios from 'axios'
-import type { AxiosInstance, AxiosError } from 'axios'
-import type { AuditoriaResponse } from '../types/reportes'
+import { apolloClient } from '../graphql/client';
+import {
+  GET_AUDITORIA_MEDICAMENTOS_CLIENTES,
+  GET_RESUMEN_DASHBOARD,
+  type AuditoriaMedicamentosClientesGraphQL,
+  type ResumenDashboardGraphQL,
+} from '../graphql/reportes';
+import type { AuditoriaResponse } from '../types/reportes';
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000'
+type AuditoriaQueryResult = {
+  auditoriaMedicamentosClientes: AuditoriaMedicamentosClientesGraphQL;
+};
 
-const apiClient: AxiosInstance = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-})
+type DashboardQueryResult = {
+  resumenDashboard: ResumenDashboardGraphQL;
+};
 
-// Interceptor para manejo de errores global
-apiClient.interceptors.response.use(
-  (response) => response,
-  (error: AxiosError) => {
-    const message =
-      (error.response?.data as { message?: string })?.message ??
-      'Error en la solicitud'
-    return Promise.reject(new Error(message))
-  },
-)
-
-/**
- * REPORTES API
- */
 export async function getAuditoriaMedicamentosClientes() {
   try {
-    const response = await apiClient.get<AuditoriaResponse>(
-      `/reportes/auditoria/medicamentos-clientes`,
-    )
-    return response.data
+    const { data } = await apolloClient.query<AuditoriaQueryResult>({
+      query: GET_AUDITORIA_MEDICAMENTOS_CLIENTES,
+      fetchPolicy: 'network-only',
+    });
+
+    const reporte = data.auditoriaMedicamentosClientes;
+
+    const resumenPorCliente = Object.fromEntries(
+      reporte.resumenPorCliente.map((item) => [item.clienteCedula, {
+        clienteNombreCompleto: item.clienteNombreCompleto,
+        totalMascotas: item.totalMascotas,
+      }]),
+    );
+
+    const resumenPorMedicamento = Object.fromEntries(
+      reporte.resumenPorMedicamento.map((item) => [String(item.medicamentoId), {
+        medicamentoNombre: item.medicamentoNombre,
+        totalMascotas: item.totalMascotas,
+      }]),
+    );
+
+    return {
+      generadoEn: reporte.generadoEn,
+      filtrosAplicados: reporte.filtrosAplicados,
+      totalRegistros: reporte.totalRegistros,
+      totalInconsistencias: reporte.totalInconsistencias,
+      resumenPorCliente,
+      resumenPorMedicamento,
+      detalles: reporte.detalles,
+    } satisfies AuditoriaResponse;
   } catch (error) {
-    throw new Error('No fue posible cargar el reporte de auditoría')
+    throw new Error('No fue posible cargar el reporte de auditoría');
   }
 }
 
-// Export all functions as a single API object
-export const reportesAPI = {
-  getAuditoriaMedicamentosClientes,
+export async function getResumenDashboard() {
+  const { data } = await apolloClient.query<DashboardQueryResult>({
+    query: GET_RESUMEN_DASHBOARD,
+    fetchPolicy: 'network-only',
+  });
+
+  return data.resumenDashboard;
 }
 
-export default apiClient
+export const reportesAPI = {
+  getAuditoriaMedicamentosClientes,
+  getResumenDashboard,
+};
+
+export default reportesAPI;

@@ -1,5 +1,29 @@
-import axios from 'axios'
-import type { AxiosInstance, AxiosError } from 'axios'
+import { apolloClient } from '../graphql/client';
+import type { DocumentNode } from 'graphql';
+import {
+  CREATE_CLIENTE,
+  CREATE_MEDICAMENTO,
+  DELETE_CLIENTE,
+  DELETE_MEDICAMENTO,
+  GET_CLIENTE,
+  GET_CLIENTES,
+  GET_MEDICAMENTO,
+  GET_MEDICAMENTOS,
+  UPDATE_CLIENTE,
+  UPDATE_MEDICAMENTO,
+  type ClienteGraphQL,
+  type MedicamentoGraphQL,
+} from '../graphql/domain';
+import {
+  CREATE_MASCOTA,
+  DELETE_MASCOTA,
+  GET_MASCOTA,
+  GET_MASCOTAS,
+  UPDATE_MASCOTA,
+  type MascotaGraphQL,
+  type MascotaInputGraphQL,
+  type UpdateMascotaInputGraphQL,
+} from '../graphql/mascotas';
 import type {
   Cliente,
   CreateClientePayload,
@@ -10,128 +34,178 @@ import type {
   UpdateClientePayload,
   UpdateMascotaPayload,
   UpdateMedicamentoPayload,
-} from '../types/domain'
+} from '../types/domain';
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000'
+async function queryGraphQL<TData, TVariables extends Record<string, unknown> = Record<string, never>>(
+  query: DocumentNode,
+  variables?: TVariables,
+): Promise<TData> {
+  const response = await apolloClient.query<TData, TVariables>({
+    query,
+    variables: variables ?? ({} as TVariables),
+    fetchPolicy: 'network-only',
+  });
 
-const apiClient: AxiosInstance = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-})
+  return response.data as TData;
+}
 
-// Interceptor para manejo de errores global
-apiClient.interceptors.response.use(
-  (response) => response,
-  (error: AxiosError) => {
-    const message =
-      (error.response?.data as { message?: string })?.message ??
-      'Error en la solicitud'
-    return Promise.reject(new Error(message))
-  },
-)
+async function mutateGraphQL<TData, TVariables extends Record<string, unknown> = Record<string, never>>(
+  mutation: DocumentNode,
+  variables?: TVariables,
+): Promise<TData> {
+  const response = await apolloClient.mutate<TData, TVariables>({
+    mutation,
+    variables: variables ?? ({} as TVariables),
+  });
+
+  if (!response.data) {
+    throw new Error('No fue posible completar la operación');
+  }
+
+  return response.data as TData;
+}
 
 /**
  * CLIENTES API
  */
-export function getClientes() {
-  return apiClient.get<Cliente[]>('/clientes').then((res) => res.data)
+export async function getClientes(): Promise<Cliente[]> {
+  const data = await queryGraphQL<{ clientes: ClienteGraphQL[] }>(GET_CLIENTES);
+  return data.clientes;
 }
 
-export function createCliente(payload: CreateClientePayload) {
-  return apiClient.post<Cliente>('/clientes', payload).then((res) => res.data)
+export async function createCliente(payload: CreateClientePayload): Promise<Cliente> {
+  const data = await mutateGraphQL<{ createCliente: ClienteGraphQL }, { input: CreateClientePayload }>(
+    CREATE_CLIENTE,
+    { input: payload },
+  );
+  return data.createCliente;
 }
 
-export function updateCliente(cedula: string, payload: UpdateClientePayload) {
-  return apiClient
-    .patch<Cliente>(`/clientes/${cedula}`, payload)
-    .then((res) => res.data)
+export async function updateCliente(
+  cedula: string,
+  payload: UpdateClientePayload,
+): Promise<Cliente> {
+  const data = await mutateGraphQL<{ updateCliente: ClienteGraphQL }, { cedula: string; input: UpdateClientePayload }>(
+    UPDATE_CLIENTE,
+    { cedula, input: payload },
+  );
+  return data.updateCliente;
 }
 
-export function deleteCliente(cedula: string) {
-  return apiClient.delete(`/clientes/${cedula}`).then((res) => res.data)
+export async function deleteCliente(cedula: string): Promise<Cliente> {
+  const data = await mutateGraphQL<{ deleteCliente: ClienteGraphQL }, { cedula: string }>(
+    DELETE_CLIENTE,
+    { cedula },
+  );
+  return data.deleteCliente;
+}
+
+export async function getClienteById(cedula: string): Promise<Cliente> {
+  const data = await queryGraphQL<{ cliente: ClienteGraphQL }, { cedula: string }>(GET_CLIENTE, { cedula });
+  return data.cliente;
 }
 
 /**
  * MEDICAMENTOS API
  */
-export function getMedicamentos() {
-  return apiClient
-    .get<Medicamento[]>('/medicamentos')
-    .then((res) => res.data)
+export async function getMedicamentos(): Promise<Medicamento[]> {
+  const data = await queryGraphQL<{ medicamentos: MedicamentoGraphQL[] }>(GET_MEDICAMENTOS);
+  return data.medicamentos;
 }
 
-export function getMedicamentoById(id: number) {
-  return apiClient.get<Medicamento>(`/medicamentos/${id}`).then((res) => res.data)
+export async function getMedicamentoById(id: number): Promise<Medicamento> {
+  const data = await queryGraphQL<{ medicamento: MedicamentoGraphQL }, { id: number }>(GET_MEDICAMENTO, { id });
+  return data.medicamento;
 }
 
-export function createMedicamento(payload: CreateMedicamentoPayload) {
-  return apiClient
-    .post<Medicamento>('/medicamentos', payload)
-    .then((res) => res.data)
+export async function createMedicamento(
+  payload: CreateMedicamentoPayload,
+): Promise<Medicamento> {
+  const data = await mutateGraphQL<{ createMedicamento: MedicamentoGraphQL }, { input: CreateMedicamentoPayload }>(
+    CREATE_MEDICAMENTO,
+    { input: payload },
+  );
+  return data.createMedicamento;
 }
 
-export function updateMedicamento(
+export async function updateMedicamento(
   id: number,
   payload: UpdateMedicamentoPayload,
-) {
-  return apiClient
-    .patch<Medicamento>(`/medicamentos/${id}`, payload)
-    .then((res) => res.data)
+): Promise<Medicamento> {
+  const data = await mutateGraphQL<{ updateMedicamento: MedicamentoGraphQL }, { id: number; input: UpdateMedicamentoPayload }>(
+    UPDATE_MEDICAMENTO,
+    { id, input: payload },
+  );
+  return data.updateMedicamento;
 }
 
-export function deleteMedicamento(id: number) {
-  return apiClient.delete(`/medicamentos/${id}`).then((res) => res.data)
+export async function deleteMedicamento(id: number): Promise<Medicamento> {
+  const data = await mutateGraphQL<{ deleteMedicamento: MedicamentoGraphQL }, { id: number }>(
+    DELETE_MEDICAMENTO,
+    { id },
+  );
+  return data.deleteMedicamento;
 }
 
 /**
  * MASCOTAS API
  */
-export function getMascotas() {
-  return apiClient.get<Mascota[]>('/mascotas').then((res) => res.data)
+export async function getMascotas(): Promise<Mascota[]> {
+  const data = await queryGraphQL<{ mascotas: MascotaGraphQL[] }>(GET_MASCOTAS);
+  return data.mascotas;
 }
 
-export function getMascotaById(id: string) {
-  return apiClient.get<Mascota>(`/mascotas/${id}`).then((res) => res.data)
+export async function getMascotaById(id: string): Promise<Mascota> {
+  const data = await queryGraphQL<{ mascota: MascotaGraphQL | null }, { id: string }>(GET_MASCOTA, { id });
+  if (!data.mascota) {
+    throw new Error('Mascota no encontrada');
+  }
+  return data.mascota;
 }
 
-export function createMascota(payload: CreateMascotaPayload) {
-  return apiClient
-    .post<Mascota>('/mascotas', payload)
-    .then((res) => res.data)
+export async function createMascota(payload: CreateMascotaPayload): Promise<Mascota> {
+  const data = await mutateGraphQL<{ createMascota: MascotaGraphQL }, { input: MascotaInputGraphQL }>(
+    CREATE_MASCOTA,
+    { input: payload },
+  );
+  return data.createMascota;
 }
 
-export function updateMascota(id: string, payload: UpdateMascotaPayload) {
-  return apiClient
-    .patch<Mascota>(`/mascotas/${id}`, payload)
-    .then((res) => res.data)
+export async function updateMascota(
+  id: string,
+  payload: UpdateMascotaPayload,
+): Promise<Mascota> {
+  const data = await mutateGraphQL<{ updateMascota: MascotaGraphQL }, { id: string; input: UpdateMascotaInputGraphQL }>(
+    UPDATE_MASCOTA,
+    { id, input: payload },
+  );
+  return data.updateMascota;
 }
 
-export function deleteMascota(id: string) {
-  return apiClient.delete(`/mascotas/${id}`).then((res) => res.data)
+export async function deleteMascota(id: string): Promise<Mascota> {
+  const data = await mutateGraphQL<{ deleteMascota: MascotaGraphQL }, { id: string }>(
+    DELETE_MASCOTA,
+    { id },
+  );
+  return data.deleteMascota;
 }
 
-// Export all functions as a single API object
 export const domainAPI = {
-  // Clientes
   getClientes,
+  getClienteById,
   createCliente,
   updateCliente,
   deleteCliente,
-  // Medicamentos
   getMedicamentos,
   getMedicamentoById,
   createMedicamento,
   updateMedicamento,
   deleteMedicamento,
-  // Mascotas
   getMascotas,
   getMascotaById,
   createMascota,
   updateMascota,
   deleteMascota,
-}
+};
 
-export default apiClient
+export default domainAPI;

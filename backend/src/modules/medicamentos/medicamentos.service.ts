@@ -52,7 +52,8 @@ export class MedicamentosService extends BaseService {
     this.ensureId(id);
 
     const medicamento = await this.findOne(id);
+    const deletedMedicamento = { ...medicamento };
     await this.medicamentosRepository.remove(medicamento);
-    return medicamento;
+    return deletedMedicamento;
   }
 }

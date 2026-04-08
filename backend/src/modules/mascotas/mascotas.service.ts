@@ -104,7 +104,8 @@ export class MascotasService extends BaseService {
     this.ensureId(id);
 
     const mascota = await this.findOne(id);
+    const deletedMascota = { ...mascota };
     await this.mascotasRepository.remove(mascota);
-    return mascota;
+    return deletedMascota;
   }
 }

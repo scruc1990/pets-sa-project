@@ -59,7 +59,8 @@ export class ClientesService extends BaseService {
     this.ensureId(cedula);
 
     const cliente = await this.findOne(cedula);
+    const deletedCliente = { ...cliente };
     await this.clientesRepository.remove(cliente);
-    return cliente;
+    return deletedCliente;
   }
 }

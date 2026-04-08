@@ -10,6 +10,18 @@ import { Request, Response } from 'express';
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost): void {
+    const hostType = host.getType<string>();
+
+    // GraphQL and other transports do not expose Express response.status/json.
+    // Let Nest/Apollo serialize the original error in those contexts.
+    if (hostType !== 'http') {
+      if (exception instanceof Error) {
+        throw exception;
+      }
+
+      throw new Error('Error interno del servidor');
+    }
+
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
